@@ -2,14 +2,23 @@ from collections import OrderedDict
 from typing import Iterable, Dict, List, Type, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from qt.core import QCheckBox, QComboBox
+    try:
+        from qt.core import QCheckBox, QComboBox  # type: ignore
+    except ImportError:
+        # Fallback for editors/type checkers outside the Calibre runtime
+        from PyQt5.QtWidgets import QCheckBox, QComboBox  # type: ignore
 
 __all__ = (
     'DEFAULT_MIRRORS', 'SearchOption', 'SearchConfiguration', 'CheckboxConfiguration', 'Order', 'Content', 'Access',
     'FileType', 'Source', 'Language'
 )
 
-DEFAULT_MIRRORS = ['https://annas-archive.org', 'https://annas-archive.li', 'https://annas-archive.se']
+DEFAULT_MIRRORS = [
+    'https://annas-archive.se',
+    'https://annas-archive.li',
+    'https://annas-archive.pm',
+    'https://annas-archive.in'
+]
 RESULTS_PER_PAGE = 100
 
 

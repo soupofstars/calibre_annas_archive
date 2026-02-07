@@ -1,3 +1,5 @@
 #!/bin/bash
-version=$(grep ' version' __init__.py | sed -r "s/^.*version\s*= \(([0-9]+), ([0-9]+), ([0-9]+)\).*/\1.\2.\3/")
-zip "calibre_annas_archive-v${version}.zip" README.md plugin-import-name-store_annas_archive.txt __init__.py annas_archive.py config.py constants.py
+version=$(
+    sed -nE 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*\(([0-9]+),[[:space:]]*([0-9]+),[[:space:]]*([0-9]+)\).*/\1.\2.\3/p' __init__.py
+)
+zip "calibre_annas_archive-v${version}.zip" __init__.py README.md plugin-import-name-store_annas_archive.txt annas_archive.py config.py constants.py

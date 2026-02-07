@@ -37,3 +37,25 @@ These options affect what files are shown in the downloads found by the search (
 ### Mirrors
 This is a list of mirrors that the plugin will try, in the specified order, to access.
 You can change the order of, delete, and add mirror urls.
+
+If `annas-archive.org` is unreachable, use one of the currently published mirrors:
+`https://annas-archive.se`, `https://annas-archive.li`, `https://annas-archive.pm`, `https://annas-archive.in`.
+The plugin defaults have been updated to prioritize these.
+
+### Bookworm wanted list (optional)
+If you self-host Bookworm (or another service that exposes `GET /api/calibre/wanted`), you can let the plugin pull your
+wanted list and search Anna's Archive for matches.
+
+1. Open the plugin settings and enable **Bookworm integration**.
+2. Enter the base URL of your Bookworm instance (e.g. `https://books.example.com`).
+3. If your instance requires authentication, paste a bearer token (leave blank for public endpoints).
+4. In the Calibre store search bar, type `bookworm:wanted` and press Enter. The plugin will fetch the wanted list,
+   search by ISBN/title, and show the first match per entry (up to the result limit).
+
+#### Quick picker
+If you want to choose a specific wanted book first, type `bookworm:pick` (or `bookworm:list`). A picker dialog will show
+your wanted list; select an entry and the plugin will run the search for you.
+
+#### Sidebar
+If Bookworm is enabled, the store window shows a sidebar with your wanted books. Click a title and the store loads the
+Anna's Archive search for that book—no typing needed. You can hide the sidebar in the plugin settings.

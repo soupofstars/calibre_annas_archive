@@ -6,12 +6,12 @@ from calibre_plugins.store_annas_archive.constants import (DEFAULT_MIRRORS, Sear
 try:
     from qt.core import (Qt, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QGroupBox, QScrollArea,
                          QAbstractScrollArea, QComboBox, QCheckBox, QSizePolicy, QListWidget, QListWidgetItem,
-                         QAbstractItemView, QShortcut, QKeySequence)
+                         QAbstractItemView, QShortcut, QKeySequence, QLineEdit)
 except (ImportError, ModuleNotFoundError):
     from PyQt5.QtCore import Qt
     from PyQt5.QtWidgets import (QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QGroupBox, QScrollArea,
                                  QAbstractScrollArea, QComboBox, QCheckBox, QSizePolicy, QListWidget, QListWidgetItem,
-                                 QAbstractItemView, QShortcut)
+                                 QAbstractItemView, QShortcut, QLineEdit)
     from PyQt5.QtGui import QKeySequence
 
 load_translations()
@@ -112,6 +112,9 @@ class ConfigWidget(QWidget):
         self.content_type.setToolTip(_(
             'Get the header of each site and verify that it has an \'application\' content type'))
         link_layout.addWidget(self.content_type)
+        self.close_after_download = QCheckBox(_('Close store window after download completes (inline mode only)'), link_options)
+        self.close_after_download.setToolTip(_('When using the inline web view, close the store window once a download finishes'))
+        link_layout.addWidget(self.close_after_download)
         horizontal_layout.addWidget(link_options)
 
         mirrors = QGroupBox(_('Mirrors'), self)
@@ -125,6 +128,36 @@ class ConfigWidget(QWidget):
 
         self.open_external = QCheckBox(_('Open store in external web browser'), self)
         main_layout.addWidget(self.open_external)
+
+        # Bookworm integration
+        bookworm_box = QGroupBox(_('Bookworm wanted list'), self)
+        bookworm_layout = QGridLayout(bookworm_box)
+        bookworm_layout.setContentsMargins(6, 6, 6, 6)
+
+        self.bookworm_enabled = QCheckBox(_('Enable Bookworm integration'), bookworm_box)
+        self.bookworm_enabled.setToolTip(_('Fetch wanted books from a Bookworm instance via /api/calibre/wanted'))
+        bookworm_layout.addWidget(self.bookworm_enabled, 0, 0, 1, 2)
+
+        self.bookworm_sidebar = QCheckBox(_('Show Bookworm sidebar'), bookworm_box)
+        self.bookworm_sidebar.setToolTip(_('Show a wanted-list sidebar next to the store window'))
+        bookworm_layout.addWidget(self.bookworm_sidebar, 1, 0, 1, 2)
+
+        bw_url_label = QLabel(_('API base URL'), bookworm_box)
+        bw_url_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        bookworm_layout.addWidget(bw_url_label, 2, 0)
+        self.bookworm_url = QLineEdit(bookworm_box)
+        self.bookworm_url.setPlaceholderText('https://bookworm.example.com')
+        bookworm_layout.addWidget(self.bookworm_url, 2, 1)
+
+        bw_token_label = QLabel(_('API token (optional)'), bookworm_box)
+        bw_token_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        bookworm_layout.addWidget(bw_token_label, 3, 0)
+        self.bookworm_token = QLineEdit(bookworm_box)
+        self.bookworm_token.setEchoMode(QLineEdit.EchoMode.Password)
+        self.bookworm_token.setPlaceholderText(_('Leave blank if your instance is public'))
+        bookworm_layout.addWidget(self.bookworm_token, 3, 1)
+
+        main_layout.addWidget(bookworm_box)
 
         self.load_settings()
 
@@ -169,6 +202,12 @@ class ConfigWidget(QWidget):
         self.open_external.setChecked(config.get('open_external', False))
         self.mirrors.load_mirrors(config.get('mirrors', DEFAULT_MIRRORS))
 
+        bookworm = config.get('bookworm', {})
+        self.bookworm_enabled.setChecked(bookworm.get('enabled', False))
+        self.bookworm_sidebar.setChecked(bookworm.get('sidebar', True))
+        self.bookworm_url.setText(bookworm.get('base_url', ''))
+        self.bookworm_token.setText(bookworm.get('token', ''))
+
         search_opts = config.get('search', {})
         for configuration in self.search_options.values():
             configuration.load(search_opts.get(configuration.config_option, configuration.default))
@@ -176,6 +215,8 @@ class ConfigWidget(QWidget):
         link_opts = config.get('link', {})
         self.url_extension.setChecked(link_opts.get('url_extension', True))
         self.content_type.setChecked(link_opts.get('content_type', False))
+        ui_opts = config.get('ui', {})
+        self.close_after_download.setChecked(ui_opts.get('close_after_download', False))
 
     def save_settings(self):
         self.store.config['open_external'] = self.open_external.isChecked()
@@ -188,4 +229,13 @@ class ConfigWidget(QWidget):
         self.store.config['link'] = {
             'url_extension': self.url_extension.isChecked(),
             'content_type': self.content_type.isChecked()
+        }
+        self.store.config['ui'] = {
+            'close_after_download': self.close_after_download.isChecked()
+        }
+        self.store.config['bookworm'] = {
+            'enabled': self.bookworm_enabled.isChecked(),
+            'sidebar': self.bookworm_sidebar.isChecked(),
+            'base_url': self.bookworm_url.text().strip(),
+            'token': self.bookworm_token.text().strip()
         }
