@@ -59,3 +59,11 @@ your wanted list; select an entry and the plugin will run the search for you.
 #### Sidebar
 If Bookworm is enabled, the store window shows a sidebar with your wanted books. Click a title and the store loads the
 Anna's Archive search for that book—no typing needed. You can hide the sidebar in the plugin settings.
+
+### Recent improvements
+- Bookworm list is sorted alphabetically (title, then author) and shows `Title | Authors` for clarity.
+- Sidebar/list widths increased for better readability.
+- Sidebar stays open reliably even when the store uses Calibre’s separate window; navigation opens a store window instead of the system browser.
+- Optional inline mode (when Qt WebEngine is available) puts the sidebar and store in one window and can auto-close after a download (configurable).
+- Added setting to auto-close the inline store after a download completes.
+- Plugin packaged as `calibre_annas_archive-v0.4.8.zip`; use the latest zip when installing/upgrading.
