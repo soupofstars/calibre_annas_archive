@@ -17,7 +17,11 @@ DEFAULT_MIRRORS = [
     'https://annas-archive.se',
     'https://annas-archive.li',
     'https://annas-archive.pm',
-    'https://annas-archive.in'
+    'https://annas-archive.in',
+    'https://annas-archive.gl',
+    'https://annas-archive.pk',
+    'https://annas-archive.vg',
+    'https://annas-archive.gd'
 ]
 RESULTS_PER_PAGE = 100
 

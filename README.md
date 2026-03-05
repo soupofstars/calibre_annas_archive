@@ -39,7 +39,8 @@ This is a list of mirrors that the plugin will try, in the specified order, to a
 You can change the order of, delete, and add mirror urls.
 
 If `annas-archive.org` is unreachable, use one of the currently published mirrors:
-`https://annas-archive.se`, `https://annas-archive.li`, `https://annas-archive.pm`, `https://annas-archive.in`.
+`https://annas-archive.se`, `https://annas-archive.li`, `https://annas-archive.pm`, `https://annas-archive.in`,
+`https://annas-archive.gl`, `https://annas-archive.pk`, `https://annas-archive.vg`, `https://annas-archive.gd`.
 The plugin defaults have been updated to prioritize these.
 
 ### Bookworm wanted list (optional)
@@ -66,4 +67,4 @@ Anna's Archive search for that book—no typing needed. You can hide the sidebar
 - Sidebar stays open reliably even when the store uses Calibre’s separate window; navigation opens a store window instead of the system browser.
 - Optional inline mode (when Qt WebEngine is available) puts the sidebar and store in one window and can auto-close after a download (configurable).
 - Added setting to auto-close the inline store after a download completes.
-- Plugin packaged as `calibre_annas_archive-v0.4.8.zip`; use the latest zip when installing/upgrading.
+- Plugin packaged as `calibre_annas_archive-v0.4.9.zip`; use the latest zip when installing/upgrading.

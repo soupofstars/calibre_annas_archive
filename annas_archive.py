@@ -46,6 +46,7 @@ SearchResults = Generator[SearchResult, None, None]
 
 
 class AnnasArchiveStore(StorePlugin):
+    MIRRORS_MIGRATION_KEY = 'mirrors_migrated_0_4_9'
 
     def __init__(self, gui, name, config=None, base_plugin=None):
         super().__init__(gui, name, config, base_plugin)
@@ -53,15 +54,48 @@ class AnnasArchiveStore(StorePlugin):
         # Keep references to detached sidebars so they are not GC'd.
         self._sidebar_windows = []
 
+    @staticmethod
+    def _normalize_mirrors(mirrors):
+        ordered = []
+        seen = set()
+        for mirror in mirrors or ():
+            value = str(mirror).strip()
+            if value and value not in seen:
+                seen.add(value)
+                ordered.append(value)
+        return ordered
+
+    def get_mirrors(self):
+        mirrors = self._normalize_mirrors(self.config.get('mirrors', ()))
+        if not mirrors:
+            mirrors = list(DEFAULT_MIRRORS)
+
+        # One-time migration so existing installs automatically include newly
+        # added defaults (users can still edit/remove mirrors afterward).
+        if not self.config.get(self.MIRRORS_MIGRATION_KEY, False):
+            known = set(mirrors)
+            changed = False
+            for mirror in DEFAULT_MIRRORS:
+                if mirror not in known:
+                    mirrors.append(mirror)
+                    known.add(mirror)
+                    changed = True
+            if changed or 'mirrors' not in self.config:
+                self.config['mirrors'] = mirrors
+            self.config[self.MIRRORS_MIGRATION_KEY] = True
+
+        return mirrors
+
     def _search(self, url: str, max_results: int, timeout: int) -> SearchResults:
         br = browser()
         doc = None
         counter = max_results
 
         for page in range(1, ceil(max_results / RESULTS_PER_PAGE) + 1):
-            mirrors = self.config.get('mirrors', DEFAULT_MIRRORS)
+            mirrors = list(self.get_mirrors())
             if self.working_mirror is not None:
-                mirrors.remove(self.working_mirror)
+                if self.working_mirror in mirrors:
+                    mirrors.remove(self.working_mirror)
                 mirrors.insert(0, self.working_mirror)
             for mirror in mirrors:
                 with closing(br.open(url.format(base=mirror, page=page), timeout=timeout)) as resp:
@@ -293,7 +327,7 @@ class AnnasArchiveStore(StorePlugin):
 
         # Otherwise, open a new Calibre store window (not the external browser).
         if self.working_mirror is None:
-            self.working_mirror = self.config.get('mirrors', DEFAULT_MIRRORS)[0]
+            self.working_mirror = self.get_mirrors()[0]
         try:
             d = WebStoreDialog(self.gui, self.working_mirror, dialog or self.gui, search_url)
             d.setWindowTitle(self.name)
@@ -308,7 +342,7 @@ class AnnasArchiveStore(StorePlugin):
 
     def _build_sidebar_search_url(self, term: str) -> str:
         search_opts = self.config.get('search', {})
-        base = self.working_mirror or self.config.get('mirrors', DEFAULT_MIRRORS)[0]
+        base = self.working_mirror or self.get_mirrors()[0]
         url = f'{base}/search?page=1&q={quote_plus(term)}&display=table'
         for option in SearchOption.options:
             value = search_opts.get(option.config_option, ())
@@ -386,7 +420,7 @@ class AnnasArchiveStore(StorePlugin):
             if self.working_mirror is not None:
                 url = self.working_mirror
             else:
-                url = self.config.get('mirrors', DEFAULT_MIRRORS)[0]
+                url = self.get_mirrors()[0]
         if external or self.config.get('open_external', False):
             open_url(QUrl(url))
         else:
@@ -410,7 +444,7 @@ class AnnasArchiveStore(StorePlugin):
 
         br = browser()
         if self.working_mirror is None:
-            self.working_mirror = self.config.get('mirrors', DEFAULT_MIRRORS)[0]
+            self.working_mirror = self.get_mirrors()[0]
         with closing(br.open(self._get_url(search_result.detail_item), timeout=timeout)) as f:
             doc = html.fromstring(f.read())
 

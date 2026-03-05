@@ -1,7 +1,7 @@
 from typing import Dict
 
-from calibre_plugins.store_annas_archive.constants import (DEFAULT_MIRRORS, SearchConfiguration, Order, Content, Access,
-                                                           FileType, Source, Language)
+from calibre_plugins.store_annas_archive.constants import (SearchConfiguration, Order, Content, Access, FileType, Source,
+                                                           Language)
 
 try:
     from qt.core import (Qt, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QGroupBox, QScrollArea,
@@ -200,7 +200,7 @@ class ConfigWidget(QWidget):
         config = self.store.config
 
         self.open_external.setChecked(config.get('open_external', False))
-        self.mirrors.load_mirrors(config.get('mirrors', DEFAULT_MIRRORS))
+        self.mirrors.load_mirrors(self.store.get_mirrors())
 
         bookworm = config.get('bookworm', {})
         self.bookworm_enabled.setChecked(bookworm.get('enabled', False))
